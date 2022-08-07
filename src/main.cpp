@@ -13,7 +13,7 @@ const int oneWireBus = 4;
 // Setup a oneWire instance to communicate with any OneWire devices
 OneWire oneWire(oneWireBus);
 // Pass our oneWire reference to Dallas Temperature sensor
-DallasTemperature sensors(&oneWire);
+DallasTemperature tempsensor(&oneWire);
 
 int lightSensor() {
     int sensorValue = analogRead(A0);
@@ -22,8 +22,8 @@ int lightSensor() {
 }
 
 float tempSensor() {
-    sensors.requestTemperatures();
-    float temperatureC = sensors.getTempCByIndex(0);
+    tempsensor.requestTemperatures();
+    float temperatureC = tempsensor.getTempCByIndex(0);
     Serial.print(temperatureC);
     Serial.println("°C");
     return temperatureC;
@@ -41,9 +41,7 @@ void publish(const char *sensor, float payload) {
     client.publish(topic.c_str(), std::to_string(payload).c_str());
 }
 
-void setup() {
-    Serial.begin(BAUD_RATE);
-    Serial.println();
+void connectToWifi() {
     Serial.print("Connecting to: ");
     Serial.println(WIFI_SSID);
     long timeWifiStart = millis();
@@ -58,7 +56,9 @@ void setup() {
     Serial.println("");
     Serial.print("Connected: ");
     Serial.println(WiFi.localIP());
+}
 
+void connectToMqtt() {
     secure.setTrustAnchors(&MQTT_CERTIFICATES);
     long timeMqttStart = millis();
     client.setServer(MQTT_BROKER, MQTT_PORT);
@@ -77,9 +77,14 @@ void setup() {
     timeMqttStart = millis() - timeMqttStart;
     Serial.print(timeMqttStart);
     Serial.println("ms");
+}
 
-    // Start the DS18B20 sensor
-    sensors.begin();
+void setup() {
+    Serial.begin(BAUD_RATE);
+    Serial.println();
+    connectToWifi();
+    connectToMqtt();
+    tempsensor.begin();
 }
 
 void loop() {
