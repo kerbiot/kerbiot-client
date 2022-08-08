@@ -93,8 +93,11 @@ void loop() {
     publish("Temperature", tempSensor());
 
     if (DEEP_SLEEP) {
-        ESP.deepSleep(DEEP_SLEEP_DELAY);
+        Serial.print("going to deep sleep after ");
+        Serial.print(millis());
+        Serial.println("ms since reset");
+        ESP.deepSleep(DEEP_SLEEP_DELAY - millis() * 1000);
     }
 
-    delay(DELAY);
+    delay(LOOP_DELAY);
 }
