@@ -85,19 +85,14 @@ void setup() {
     connectToWifi();
     connectToMqtt();
     tempsensor.begin();
-}
-
-void loop() {
 
     publish("Light", lightSensor());
     publish("Temperature", tempSensor());
 
-    if (DEEP_SLEEP) {
-        Serial.print("going to deep sleep after ");
-        Serial.print(millis());
-        Serial.println("ms since reset");
-        ESP.deepSleep(DEEP_SLEEP_DELAY - millis() * 1000);
-    }
-
-    delay(LOOP_DELAY);
+    Serial.print("going to deep sleep after ");
+    Serial.print(millis());
+    Serial.println("ms since reset");
+    ESP.deepSleep(DEEP_SLEEP_DELAY - millis() * 1000);
 }
+
+void loop() {}
