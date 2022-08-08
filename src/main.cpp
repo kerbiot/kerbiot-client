@@ -22,6 +22,7 @@ int lightSensor() {
 }
 
 float tempSensor() {
+    tempsensor.begin();
     tempsensor.requestTemperatures();
     float temperatureC = tempsensor.getTempCByIndex(0);
     Serial.print(temperatureC);
@@ -44,39 +45,25 @@ void publish(const char *sensor, float payload) {
 void connectToWifi() {
     Serial.print("Connecting to: ");
     Serial.println(WIFI_SSID);
-    long timeWifiStart = millis();
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
-    }
-    timeWifiStart = millis() - timeWifiStart;
-    Serial.print(timeWifiStart);
-    Serial.println("ms");
-    Serial.println("");
-    Serial.print("Connected: ");
-    Serial.println(WiFi.localIP());
 }
 
 void connectToMqtt() {
     secure.setTrustAnchors(&MQTT_CERTIFICATES);
-    long timeMqttStart = millis();
     client.setServer(MQTT_BROKER, MQTT_PORT);
+    client.connect(MQTT_DEVICE_ID, MQTT_USER, MQTT_PASSWORD);
+}
 
+void waitForMqtt() {
+    // TODO: error handling
+
+    Serial.println("Connecting to MQTT...");
     while (!client.connected()) {
-        Serial.println("Connecting to MQTT...");
-        if (client.connect(MQTT_DEVICE_ID, MQTT_USER, MQTT_PASSWORD)) {
+        if (WiFi.status() == WL_CONNECTED && client.connect(MQTT_DEVICE_ID, MQTT_USER, MQTT_PASSWORD)) {
             Serial.println("connected");
-        } else {
-
-            Serial.print("failed with state ");
-            Serial.print(client.state());
-            delay(2000);
         }
+        delay(250);
     }
-    timeMqttStart = millis() - timeMqttStart;
-    Serial.print(timeMqttStart);
-    Serial.println("ms");
 }
 
 void setup() {
@@ -84,10 +71,12 @@ void setup() {
     Serial.println();
     connectToWifi();
     connectToMqtt();
-    tempsensor.begin();
+    int lightValue = lightSensor();
+    float tempValue = tempSensor();
 
-    publish("Light", lightSensor());
-    publish("Temperature", tempSensor());
+    waitForMqtt();
+    publish("Light", lightValue);
+    publish("Temperature", tempValue);
 
     Serial.print("going to deep sleep after ");
     Serial.print(millis());
