@@ -6,6 +6,7 @@
 #include <WiFiClientSecure.h>
 #include <config.h>
 #include <secrets.h>
+#include <log.h>
 #include <string>
 
 // GPIO where the DS18B20 is connected to
@@ -17,7 +18,7 @@ DallasTemperature tempsensor(&oneWire);
 
 int lightSensor() {
     int sensorValue = analogRead(A0);
-    Serial.println(sensorValue);
+    logln(sensorValue);
     return sensorValue;
 }
 
@@ -25,8 +26,8 @@ float tempSensor() {
     tempsensor.begin();
     tempsensor.requestTemperatures();
     float temperatureC = tempsensor.getTempCByIndex(0);
-    Serial.print(temperatureC);
-    Serial.println("°C");
+    log(temperatureC);
+    logln("°C");
     return temperatureC;
 }
 
@@ -43,8 +44,8 @@ void publish(const char *sensor, float payload) {
 }
 
 void connectToWifi() {
-    Serial.print("Connecting to: ");
-    Serial.println(WIFI_SSID);
+    log("Connecting to: ");
+    logln(WIFI_SSID);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 }
 
@@ -57,18 +58,18 @@ void connectToMqtt() {
 void waitForMqtt() {
     // TODO: error handling
 
-    Serial.println("Connecting to MQTT...");
+    logln("Connecting to MQTT...");
     while (!client.connected()) {
         if (WiFi.status() == WL_CONNECTED && client.connect(MQTT_DEVICE_ID, MQTT_USER, MQTT_PASSWORD)) {
-            Serial.println("connected");
+            logln("connected");
         }
         delay(250);
     }
 }
 
 void setup() {
-    Serial.begin(BAUD_RATE);
-    Serial.println();
+    setupLogger(BAUD_RATE);
+    logln();
     connectToWifi();
     connectToMqtt();
     int lightValue = lightSensor();
@@ -78,9 +79,9 @@ void setup() {
     publish("Light", lightValue);
     publish("Temperature", tempValue);
 
-    Serial.print("going to deep sleep after ");
-    Serial.print(millis());
-    Serial.println("ms since reset");
+    log("going to deep sleep after ");
+    log(millis());
+    logln("ms since reset");
     ESP.deepSleep(DEEP_SLEEP_DELAY - millis() * 1000);
 }
 
