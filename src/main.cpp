@@ -5,8 +5,8 @@
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
 #include <config.h>
-#include <secrets.h>
 #include <log.h>
+#include <secrets.h>
 #include <string>
 
 // GPIO where the DS18B20 is connected to
@@ -29,6 +29,17 @@ float tempSensor() {
     log(temperatureC);
     logln("°C");
     return temperatureC;
+}
+
+float batterieSensor() {
+    int value = analogRead(A0);
+    int mappedValue = map(value, 0, 1024, 0, 4500);
+    log(mappedValue);
+    logln("mV");
+    // float batterieVoltage = mappedValue / 1000;
+    // log(batterieVoltage);
+    // logln("V");
+    return mappedValue;
 }
 
 WiFiClient wiFiClient;
@@ -70,14 +81,19 @@ void waitForMqtt() {
 void setup() {
     setupLogger(BAUD_RATE);
     logln();
+
     connectToWifi();
     connectToMqtt();
-    int lightValue = lightSensor();
+
+    // int lightValue = lightSensor();
     float tempValue = tempSensor();
+    float batterieValue = batterieSensor();
 
     waitForMqtt();
-    publish("Light", lightValue);
+
+    // publish("Light", lightValue);
     publish("Temperature", tempValue);
+    publish("batterie", batterieValue);
 
     log("going to deep sleep after ");
     log(millis());
