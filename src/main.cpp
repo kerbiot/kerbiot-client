@@ -9,20 +9,9 @@
 #include <secrets.h>
 #include <string>
 
-// GPIO where the DS18B20 is connected to
-const int oneWireBus = 4;
-// Setup a oneWire instance to communicate with any OneWire devices
-OneWire oneWire(oneWireBus);
-// Pass our oneWire reference to Dallas Temperature sensor
-DallasTemperature tempsensor(&oneWire);
-
-int lightSensor() {
-    int sensorValue = analogRead(A0);
-    logln(sensorValue);
-    return sensorValue;
-}
-
 float tempSensor() {
+    OneWire oneWire(PIN_TEMP_SENSOR);       // Setup a oneWire instance to communicate with any OneWire devices
+    DallasTemperature tempsensor(&oneWire); // Pass our oneWire reference to Dallas Temperature sensor
     tempsensor.begin();
     tempsensor.requestTemperatures();
     float temperatureC = tempsensor.getTempCByIndex(0);
@@ -31,15 +20,12 @@ float tempSensor() {
     return temperatureC;
 }
 
-float batterieSensor() {
+float batterySensor() {
     int value = analogRead(A0);
-    int mappedValue = map(value, 0, 1024, 0, 4500);
-    log(mappedValue);
-    logln("mV");
-    // float batterieVoltage = mappedValue / 1000;
-    // log(batterieVoltage);
-    // logln("V");
-    return mappedValue;
+    float batteryVoltage = ((float)value / 1024) * BATTERY_MAX_VOLTAGE; // TODO: map to 0 - 100
+    log(batteryVoltage);
+    logln("V");
+    return batteryVoltage;
 }
 
 WiFiClient wiFiClient;
@@ -51,7 +37,9 @@ void publish(const char *sensor, float payload) {
     topic.append("/");
     topic.append(sensor);
 
-    client.publish(topic.c_str(), std::to_string(payload).c_str());
+    if (!client.publish(topic.c_str(), std::to_string(payload).c_str())) {
+        logln("failed to publish"); // TODO: better error message
+    }
 }
 
 void connectToWifi() {
@@ -67,15 +55,22 @@ void connectToMqtt() {
 }
 
 void waitForMqtt() {
-    // TODO: error handling
-
     logln("Connecting to MQTT...");
-    while (!client.connected()) {
+    unsigned long timeLimit = millis() + TIME_TO_CONNECT;
+    while (!client.connected() && millis() < timeLimit) {
+
         if (WiFi.status() == WL_CONNECTED && client.connect(MQTT_DEVICE_ID, MQTT_USER, MQTT_PASSWORD)) {
             logln("connected");
+            return;
         }
-        delay(250);
+        delay(200); // TODO: test power consumption
     }
+    logln("couldn't connect to MQTT broker");
+    log("WiFi status: ");
+    logln(WiFi.status());
+    log("MQTT status: ");
+    logln(client.state());
+    ESP.deepSleep(DEEP_SLEEP_AFTER_NO_CONNECTION * 1000);
 }
 
 void setup() {
@@ -85,20 +80,18 @@ void setup() {
     connectToWifi();
     connectToMqtt();
 
-    // int lightValue = lightSensor();
-    float tempValue = tempSensor();
-    float batterieValue = batterieSensor();
+    float temperature = tempSensor();
+    float batteryVoltage = batterySensor();
 
     waitForMqtt();
 
-    // publish("Light", lightValue);
-    publish("Temperature", tempValue);
-    publish("batterie", batterieValue);
+    publish("Temperature", temperature);
+    publish("Battery", batteryVoltage);
 
     log("going to deep sleep after ");
     log(millis());
     logln("ms since reset");
-    ESP.deepSleep(DEEP_SLEEP_DELAY - millis() * 1000);
+    ESP.deepSleep(DEEP_SLEEP_DELAY * 1000 - millis() * 1000);
 }
 
 void loop() {}

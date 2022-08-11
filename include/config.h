@@ -2,4 +2,11 @@
 
 const int BAUD_RATE = 115200;
 
-const double DEEP_SLEEP_DELAY = 60e6;
+const double DEEP_SLEEP_DELAY = 60000;
+const double DEEP_SLEEP_AFTER_NO_CONNECTION = DEEP_SLEEP_DELAY * 15;
+
+const int TIME_TO_CONNECT = 20000;
+
+const int PIN_TEMP_SENSOR = 4;
+
+const float BATTERY_MAX_VOLTAGE = 4.5;
