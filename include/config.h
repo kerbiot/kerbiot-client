@@ -1,4 +1,4 @@
-#define LOGGING 0
+#define LOGGING 1
 
 const int BAUD_RATE = 115200;
 
