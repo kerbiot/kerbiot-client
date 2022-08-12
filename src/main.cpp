@@ -63,7 +63,7 @@ void waitForMqtt() {
             logln("connected");
             return;
         }
-        delay(200); // TODO: test power consumption
+        delay(100);
     }
     logln("couldn't connect to MQTT broker");
     log("WiFi status: ");
@@ -87,11 +87,12 @@ void setup() {
 
     publish("Temperature", temperature);
     publish("Battery", batteryVoltage);
+    publish("ProcessingTime", millis());
 
     log("going to deep sleep after ");
     log(millis());
     logln("ms since reset");
-    ESP.deepSleep(DEEP_SLEEP_DELAY * 1000 - millis() * 1000);
+    ESP.deepSleep(DEEP_SLEEP_DELAY * 1000 - millis() * 1000); // TODO: make sure not negative
 }
 
 void loop() {}
