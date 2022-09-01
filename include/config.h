@@ -10,3 +10,7 @@ const int TIME_TO_CONNECT = 50000;
 const int PIN_TEMP_SENSOR = 4;
 
 const float BATTERY_MAX_VOLTAGE = 4.5;
+
+const int CO2_RX_PIN = 14;
+const int CO2_TX_PIN = 12;
+const int CO2_SENSOR_WARMUP_TIME = 10000;

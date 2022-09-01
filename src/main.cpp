@@ -8,6 +8,7 @@
 #include <log.h>
 #include <secrets.h>
 #include <string>
+#include <co2.h>
 
 float tempSensor() {
     OneWire oneWire(PIN_TEMP_SENSOR);       // Setup a oneWire instance to communicate with any OneWire devices
@@ -77,16 +78,22 @@ void setup() {
     setupLogger(BAUD_RATE);
     logln();
 
+    initializeCO2(CO2_RX_PIN, CO2_TX_PIN);
+
     connectToWifi();
     connectToMqtt();
 
     float temperature = tempSensor();
     float batteryVoltage = batterySensor();
 
+    waitForCO2Heating(CO2_SENSOR_WARMUP_TIME);
+    int co2 = readCO2inPpm();
+
     waitForMqtt();
 
     publish("Temperature", temperature);
     publish("Battery", batteryVoltage);
+    publish("CO2 in ppm", co2);
     publish("ProcessingTime", millis());
 
     log("going to deep sleep after ");
