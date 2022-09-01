@@ -88,7 +88,9 @@ void setup() {
 
     waitForCO2Heating(CO2_SENSOR_WARMUP_TIME);
     int co2 = readCO2inPpm();
-
+    log("co2 in ppm: ");
+    logln(co2);
+    
     waitForMqtt();
 
     publish("Temperature", temperature);
