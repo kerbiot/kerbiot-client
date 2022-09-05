@@ -13,4 +13,4 @@ const float BATTERY_MAX_VOLTAGE = 5;
 
 const int CO2_RX_PIN = 12;
 const int CO2_TX_PIN = 14;
-const int CO2_SENSOR_WARMUP_TIME = 5000;
+const int CO2_SENSOR_WARMUP_TIME = 10000;
