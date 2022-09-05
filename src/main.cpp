@@ -1,14 +1,14 @@
 #include <Arduino.h>
 #include <DallasTemperature.h>
 #include <ESP8266WiFi.h>
-#include <OneWire.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
+#include <co2.h>
 #include <config.h>
 #include <log.h>
 #include <secrets.h>
 #include <string>
-#include <co2.h>
+#include <temp_rh.h>
 
 float tempSensor() {
     OneWire oneWire(PIN_TEMP_SENSOR);       // Setup a oneWire instance to communicate with any OneWire devices
@@ -79,23 +79,34 @@ void setup() {
     logln();
 
     initializeCO2(CO2_RX_PIN, CO2_TX_PIN);
+    initializeTemperatureHumidity(0x44);
 
     connectToWifi();
     connectToMqtt();
 
     float temperature = tempSensor();
     float batteryVoltage = batterySensor();
+    TemperatureAndHumidity tempH = readTemperatureAndHumidity();
+    log("Temperature: ");
+    log(tempH.temperature);
+    logln("°C");
+
+    log("Humidity: ");
+    log(tempH.humidity);
+    logln("%");
 
     waitForCO2Heating(CO2_SENSOR_WARMUP_TIME);
     int co2 = readCO2inPpm();
     log("co2 in ppm: ");
     logln(co2);
-    
+
     waitForMqtt();
 
     publish("Temperature", temperature);
     publish("Battery", batteryVoltage);
     publish("CO2 in ppm", co2);
+    publish("Temperature in °C", tempH.temperature);
+    publish("Humidity in %", tempH.humidity);
     publish("ProcessingTime", millis());
 
     log("going to deep sleep after ");
