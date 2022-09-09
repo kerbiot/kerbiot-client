@@ -6,17 +6,20 @@ const int CO2_SENSOR_BAUD_RATE = 9600;
 class SenseAirS8 {
 private:
     unsigned long startedAt;
+    unsigned long warmUpTime;
     SoftwareSerial *serialCO2;
 
 public:
-    SenseAirS8(int rx_pin, int tx_pin) {
+    SenseAirS8(int rx_pin, int tx_pin, unsigned long warmUpTime) {
         serialCO2 = new SoftwareSerial(rx_pin, tx_pin);
         serialCO2->begin(CO2_SENSOR_BAUD_RATE);
+
+        this->warmUpTime = warmUpTime;
 
         startedAt = millis();
     }
 
-    void wait(unsigned long warmUpTime) {
+    void wait() {
         while (millis() - startedAt < warmUpTime) {
             delay(100);
         }
@@ -40,6 +43,8 @@ public:
     }
 
     int read() {
+        wait();
+
         byte CO2Response[] = {0, 0, 0, 0, 0, 0, 0};
 
         serialCO2->write(COMMAND_READ_CO2, 7);

@@ -78,7 +78,7 @@ void setup() {
     setupLogger(BAUD_RATE);
     logln();
 
-    SenseAirS8 *senseAirS8 = new SenseAirS8(CO2_RX_PIN, CO2_TX_PIN);
+    SenseAirS8 *senseAirS8 = new SenseAirS8(CO2_RX_PIN, CO2_TX_PIN, CO2_SENSOR_WARMUP_TIME);
     SHT31Sensor *sht31 = new SHT31Sensor(SHT31_ADDRESS);
 
     connectToWifi();
@@ -95,7 +95,6 @@ void setup() {
     log(tempH.humidity);
     logln("%");
 
-    senseAirS8->wait(CO2_SENSOR_WARMUP_TIME);
     int co2 = senseAirS8->read(5);
     log("co2 in ppm: ");
     logln(co2);
