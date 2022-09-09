@@ -8,7 +8,7 @@
 #include <log.h>
 #include <secrets.h>
 #include <string>
-#include <temp_rh.h>
+#include <sht31sensor.h>
 
 float tempSensor() {
     OneWire oneWire(PIN_TEMP_SENSOR);       // Setup a oneWire instance to communicate with any OneWire devices
@@ -79,14 +79,14 @@ void setup() {
     logln();
 
     SenseAirS8 *senseAirS8 = new SenseAirS8(CO2_RX_PIN, CO2_TX_PIN);
-    initializeTemperatureHumidity(0x44);
+    SHT31Sensor *sht31 = new SHT31Sensor(SHT31_ADDRESS);
 
     connectToWifi();
     connectToMqtt();
 
     float temperature = tempSensor();
     float batteryVoltage = batterySensor();
-    TemperatureAndHumidity tempH = readTemperatureAndHumidity();
+    TemperatureAndHumidity tempH = sht31->read();
     log("Temperature: ");
     log(tempH.temperature);
     logln("°C");
