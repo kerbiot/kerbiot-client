@@ -3,7 +3,7 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
-#include <co2.h>
+#include <senseair.h>
 #include <config.h>
 #include <log.h>
 #include <secrets.h>
