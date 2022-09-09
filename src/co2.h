@@ -33,6 +33,7 @@ public:
             int result = read();
             if (result > 0)
                 return result;
+            retry++;
         }
 
         return result;
