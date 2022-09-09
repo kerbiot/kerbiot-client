@@ -26,16 +26,11 @@ public:
     }
 
     int read(int retries) {
-        int result = read();
-        if (result > 0)
-            return result;
-
         int retry = 0;
+        int result = 0;
 
-        while (retry <= retries) {
-            int result = read();
-            if (result > 0)
-                return result;
+        while (result < 1 || retry <= retries) {
+            result = read();
             retry++;
         }
 
