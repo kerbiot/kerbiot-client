@@ -78,7 +78,7 @@ void setup() {
     setupLogger(BAUD_RATE);
     logln();
 
-    initializeCO2(CO2_RX_PIN, CO2_TX_PIN);
+    SenseAirS8 *senseAirS8 = new SenseAirS8(CO2_RX_PIN, CO2_TX_PIN);
     initializeTemperatureHumidity(0x44);
 
     connectToWifi();
@@ -95,8 +95,8 @@ void setup() {
     log(tempH.humidity);
     logln("%");
 
-    waitForCO2Heating(CO2_SENSOR_WARMUP_TIME);
-    int co2 = readCO2inPpm();
+    senseAirS8->wait(CO2_SENSOR_WARMUP_TIME);
+    int co2 = senseAirS8->read(5);
     log("co2 in ppm: ");
     logln(co2);
 
@@ -104,7 +104,9 @@ void setup() {
 
     publish("Temperature", temperature);
     publish("Battery", batteryVoltage);
-    publish("CO2 in ppm", co2);
+    if (co2 > 0) {
+        publish("CO2 in ppm", co2);
+    }
     publish("Temperature in °C", tempH.temperature);
     publish("Humidity in %", tempH.humidity);
     publish("ProcessingTime", millis());
