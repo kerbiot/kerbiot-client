@@ -1,33 +1,14 @@
 #include <Arduino.h>
-#include <DallasTemperature.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
-#include <senseair.h>
 #include <config.h>
 #include <log.h>
 #include <secrets.h>
 #include <string>
+
+#include <senseair.h>
 #include <sht31sensor.h>
-
-float tempSensor() {
-    OneWire oneWire(PIN_TEMP_SENSOR);       // Setup a oneWire instance to communicate with any OneWire devices
-    DallasTemperature tempsensor(&oneWire); // Pass our oneWire reference to Dallas Temperature sensor
-    tempsensor.begin();
-    tempsensor.requestTemperatures();
-    float temperatureC = tempsensor.getTempCByIndex(0);
-    log(temperatureC);
-    logln("°C");
-    return temperatureC;
-}
-
-float batterySensor() {
-    int value = analogRead(A0);
-    float batteryVoltage = ((float)value / 1024) * BATTERY_MAX_VOLTAGE; // TODO: map to 0 - 100
-    log(batteryVoltage);
-    logln("V");
-    return batteryVoltage;
-}
 
 WiFiClient wiFiClient;
 WiFiClientSecure secure;
@@ -84,8 +65,6 @@ void setup() {
     connectToWifi();
     connectToMqtt();
 
-    float temperature = tempSensor();
-    float batteryVoltage = batterySensor();
     TemperatureAndHumidity tempH = sht31->read();
     log("Temperature: ");
     log(tempH.temperature);
@@ -101,14 +80,12 @@ void setup() {
 
     waitForMqtt();
 
-    publish("Temperature", temperature);
-    publish("Battery", batteryVoltage);
     if (co2 > 0) {
         publish("CO2 in ppm", co2);
     }
     publish("Temperature in °C", tempH.temperature);
     publish("Humidity in %", tempH.humidity);
-    publish("ProcessingTime", millis());
+    publish("ProcessingTime in ms", millis());
 
     log("going to deep sleep after ");
     log(millis());
