@@ -15,17 +15,8 @@ void setup() {
     KerbiotClient *kerbiot = new KerbiotClient();
 
     TemperatureAndHumidity tempH = sht31->read();
-    log("Temperature: ");
-    log(tempH.temperature);
-    logln("°C");
-
-    log("Humidity: ");
-    log(tempH.humidity);
-    logln("%");
 
     int co2 = senseAirS8->read(5);
-    log("co2 in ppm: ");
-    logln(co2);
 
     kerbiot->wait();
 
