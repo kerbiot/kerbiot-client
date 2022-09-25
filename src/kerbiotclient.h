@@ -53,7 +53,7 @@ public:
 
     void publish(const char *sensor, float payload) {
         log(sensor);
-        log(': ');
+        log(": ");
         logln(payload);
 
         std::string topic(MQTT_DEVICE_ID);
