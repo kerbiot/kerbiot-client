@@ -9,7 +9,7 @@ void setup() {
     setupLogger(BAUD_RATE);
     logln();
 
-    SenseAirS8 *senseAirS8 = new SenseAirS8(CO2_RX_PIN, CO2_TX_PIN, CO2_SENSOR_WARMUP_TIME);
+    SenseAirS8 *senseAirS8 = new SenseAirS8(CO2_RX_PIN, CO2_TX_PIN);
     SHT31Sensor *sht31 = new SHT31Sensor(SHT31_ADDRESS);
 
     KerbiotClient *kerbiot = new KerbiotClient();

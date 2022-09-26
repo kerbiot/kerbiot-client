@@ -1,35 +1,23 @@
+#include "s8_uart.h"
 #include <Softwareserial.h>
-
-const byte COMMAND_READ_CO2[] = {0xFE, 0X44, 0X00, 0X08, 0X02, 0X9F, 0X25};
-const int CO2_SENSOR_BAUD_RATE = 9600;
 
 class SenseAirS8 {
 private:
-    unsigned long startedAt;
-    unsigned long warmUpTime;
-    SoftwareSerial *serialCO2;
+    SoftwareSerial *S8_serial;
+    S8_UART *sensor_S8;
 
 public:
-    SenseAirS8(int rx_pin, int tx_pin, unsigned long warmUpTime) {
-        serialCO2 = new SoftwareSerial(rx_pin, tx_pin);
-        serialCO2->begin(CO2_SENSOR_BAUD_RATE);
-
-        this->warmUpTime = warmUpTime;
-
-        startedAt = millis();
-    }
-
-    void wait() {
-        while (millis() - startedAt < warmUpTime) {
-            delay(100);
-        }
+    SenseAirS8(int rx_pin, int tx_pin) {
+        S8_serial = new SoftwareSerial(rx_pin, tx_pin);
+        S8_serial->begin(S8_BAUDRATE);
+        sensor_S8 = new S8_UART(*S8_serial);
     }
 
     int read(int retries) {
         int retry = 0;
         int result = 0;
 
-        while (result < 1 || retry <= retries) {
+        while (retry <= retries && (result < 1 || result > 9999)) {
             result = read();
             retry++;
         }
@@ -38,25 +26,6 @@ public:
     }
 
     int read() {
-        wait();
-
-        byte CO2Response[] = {0, 0, 0, 0, 0, 0, 0};
-
-        serialCO2->write(COMMAND_READ_CO2, 7);
-        delay(100);
-
-        if (serialCO2->available()) {
-            for (int i = 0; i < 7; i++) {
-                int byte = serialCO2->read();
-                CO2Response[i] = byte;
-                if (CO2Response[0] != 254) {
-                    return -1;
-                }
-            }
-            unsigned long val = CO2Response[3] * 256 + CO2Response[4];
-            return val;
-        } else {
-            return -2;
-        }
+        return sensor_S8->get_co2();
     }
 };

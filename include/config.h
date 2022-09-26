@@ -9,6 +9,5 @@ const int TIME_TO_CONNECT = 50000;
 
 const int CO2_RX_PIN = 12;
 const int CO2_TX_PIN = 14;
-const int CO2_SENSOR_WARMUP_TIME = 10000;
 
 const int SHT31_ADDRESS = 0x44;
