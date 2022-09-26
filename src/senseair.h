@@ -37,8 +37,8 @@ public:
 
 #if LOGGING
     void diagnose() {
-        logln("Performing SenseAir S8 CO2 sensor diagnosis ...")
-            S8_sensor sensor;
+        logln("Performing SenseAir S8 CO2 sensor diagnosis ...");
+        S8_sensor sensor;
 
         sensor_S8->get_firmware_version(sensor.firm_version);
         int len = strlen(sensor.firm_version);
