@@ -13,9 +13,9 @@ public:
         sensor_S8 = new S8_UART(*S8_serial);
     }
 
-    int read(int retries) {
+    int16_t read(int retries) {
         int retry = 0;
-        int result = 0;
+        int16_t result = 0;
 
         while (retry <= retries && (result < 1 || result > 9999)) {
             result = read();
@@ -31,7 +31,7 @@ public:
         return result;
     }
 
-    int read() {
+    int16_t read() {
         return sensor_S8->get_co2();
     }
 

@@ -16,7 +16,7 @@ void setup() {
 
     TemperatureAndHumidity tempH = sht31->read();
 
-    int co2 = senseAirS8->read(5);
+    int16_t co2 = senseAirS8->read(5);
 
     kerbiot->wait();
 
